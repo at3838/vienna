@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<meta content="light dark" name="color-scheme"/>
+<meta content="light" name="color-scheme"/>
 <link href="data:," rel="icon"/>
 <title>維也納聖誕市集四晚行程</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -12,13 +12,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;600;700&amp;family=Playfair+Display:wght@600;700&amp;display=swap" rel="stylesheet"/>
 <style>
     :root {
+      color-scheme:light;
       --bg:#f7f0e4; --paper:#fffaf1; --ink:#241b16; --muted:#6b5a4e;
       --red:#a52e28; --red-dark:#76201d; --gold:#bd8330; --pine:#244b3d;
       --line:#ddcbb1; --soft:#ecddc7; --shadow:0 16px 46px rgba(70,38,22,.12);
       --radius-lg:30px; --radius-md:18px; --radius-sm:10px;
-    }
-    @media (prefers-color-scheme:dark){
-      :root { --bg:#171412; --paper:#211c19; --ink:#f8ecdd; --muted:#c8b7a8; --red:#df625a; --red-dark:#ef8a83; --gold:#e1ad5b; --pine:#78aa91; --line:#51443a; --soft:#342a24; --shadow:0 18px 54px rgba(0,0,0,.35); }
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth;scroll-padding-top:95px}
@@ -293,6 +291,22 @@
       .day-title{font-size:2rem;line-height:1.24}
       .jump-button{font-size:1.42rem}
     }
+
+    /* 互動路線圖 (Google Maps) */
+    .map-section{margin:0 0 70px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:28px 30px}
+    .map-section .section-head{margin-bottom:18px}
+    .map-toggles{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+    .map-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;padding:9px 15px;font:700 .88rem "Noto Sans HK",sans-serif;cursor:pointer}
+    .map-toggle .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+    .map-toggle[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+    .map-toggle:hover{border-color:var(--gold)}
+    .map-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    #vienna-map{position:relative;z-index:0;height:520px;border-radius:var(--radius-md);border:1px solid var(--line);overflow:hidden;background:var(--soft)}
+    .map-fallback{display:grid;place-items:center;height:100%;padding:24px;text-align:center;color:var(--muted);font-size:.95rem}
+    .map-hint{margin:12px 0 0;color:var(--muted);font-size:.9rem}
+    .map-pop{font-family:"Noto Sans HK",sans-serif;font-size:.92rem;line-height:1.55;color:#241b16;max-width:250px}
+    .map-pop .pop-day{font-size:.8rem;font-weight:700}
+    @media(max-width:520px){.map-section{padding:22px 16px;margin-bottom:54px}#vienna-map{height:430px}}
 </style>
 </head>
 <body>
@@ -386,6 +400,17 @@
 <section aria-labelledby="choose-food-title" class="recommendation-jumps">
 <div><p class="kicker">另外揀食</p><h2 id="choose-food-title">每日景點照行，食邊間由你即場揀</h2><p>餐廳同咖啡館已經全部抽出每日時間表。按下面兩個大掣直達獨立清單，每間都有地址、營業時間、價錢、招牌菜同 Google Maps。</p></div>
 <div class="jump-actions"><a class="jump-button restaurant-jump" href="#restaurants">餐廳推薦 <span>正餐、傳統維也納菜</span></a><a class="jump-button cafe-jump" href="#cafes">咖啡館推薦 <span>早餐、蛋糕、咖啡</span></a></div>
+</section><section aria-labelledby="route-map-title" class="map-section" id="route-map">
+<div class="section-head"><div><p class="kicker">互動路線圖</p><h2 id="route-map-title">五日景點，一張圖睇晒點行</h2></div><p>每個景點一個編號 marker，顏色跟日子分，同日景點按次序用線連起。預設只開 Day 2，㩒上面嘅日子掣逐日顯示或收起，畫面唔會一次過塞爆。</p></div>
+<div aria-label="逐日顯示或收起景點" class="map-toggles" role="group">
+<button aria-pressed="false" class="map-toggle" data-day="day1" type="button"><span class="dot" style="background:#7a5c2e"></span>Day 1 · 到埗夜</button>
+<button aria-pressed="true" class="map-toggle" data-day="day2" type="button"><span class="dot" style="background:#a52e28"></span>Day 2 · 內城皇宮線</button>
+<button aria-pressed="false" class="map-toggle" data-day="day3" type="button"><span class="dot" style="background:#244b3d"></span>Day 3 · 藝術＋Karlsplatz</button>
+<button aria-pressed="false" class="map-toggle" data-day="day4" type="button"><span class="dot" style="background:#a86e1d"></span>Day 4 · 美泉宮</button>
+<button aria-pressed="false" class="map-toggle" data-day="day5" type="button"><span class="dot" style="background:#31517d"></span>Day 5 · 司法宮＋Freyung</button>
+</div>
+<div aria-label="維也納五日行程互動地圖" id="vienna-map" role="application"></div>
+<p class="map-hint">㩒地圖上嘅編號圓點，會彈出景點名、屬於邊一日同時間表時間；編號即係當日嘅參觀次序，路線線跟住編號行。如果幾個圓點疊埋一齊，㩒落去佢哋會自動散開，逐個㩒嚟睇就得。可以拖動同放大地圖慢慢睇。</p>
 </section><section aria-labelledby="plan-title">
 <div class="section-head">
 <div><p class="kicker">逐日行程</p><h2 id="plan-title">逐區串起皇宮、建築同市集</h2></div>
@@ -1045,5 +1070,224 @@
       });
     })();
   </script>
+<script>
+    (function(){
+      var box=document.getElementById('vienna-map');
+      if(!box) return;
+      var toggles=[].slice.call(document.querySelectorAll('.map-toggle'));
+      var failed=false;
+      function showFallback(){
+        if(failed) return; failed=true;
+        box.innerHTML='<div class="map-fallback">地圖暫時載入唔到（需要網絡先載入到 Google 地圖）。下面嘅行程內容唔受影響。</div>';
+        toggles.forEach(function(b){b.disabled=true;});
+      }
+      window.viennaMapFailed=showFallback;
+      var loadTimer=setTimeout(function(){
+        if(!(window.google&&google.maps&&google.maps.Map)) showFallback();
+      },12000);
+      var DAYS={
+        day1:{label:'Day 1',date:'11 月 13 日 · 星期五',color:'#7a5c2e',stops:[
+          {name:'維也納國際機場 VIE',time:'22:30 抵達 BA0702',lat:48.11028,lng:16.56972},
+          {name:'InterContinental Vienna 酒店',time:'check-in 後休息 · 住宿基地',lat:48.20469,lng:16.37895},
+          {name:'Johann Strauss 金像 · Stadtpark',time:'任何一個朝早 · 約 15–20 分鐘',lat:48.20420,lng:16.38035}
+        ]},
+        day2:{label:'Day 2',date:'11 月 14 日 · 星期六',color:'#a52e28',stops:[
+          {name:'維也納國家歌劇院導賞團（已訂票）',time:'09:00–10:00',lat:48.20305,lng:16.36903},
+          {name:'Stephansdom＋Stephansplatz 聖誕市集',time:'10:00–11:30',lat:48.20849,lng:16.37312},
+          {name:'聖彼得教堂 Peterskirche',time:'11:30–11:45',lat:48.20954,lng:16.36997},
+          {name:'Graben＋盧斯之家 Looshaus',time:'11:45–11:55',lat:48.20806,lng:16.36673},
+          {name:'霍夫堡皇宮居所 Hofburg Imperial Apartments',time:'13:45–15:15',lat:48.20745,lng:16.36528},
+          {name:'奧地利國家圖書館 State Hall（Prunksaal）',time:'15:15–16:00',lat:48.20618,lng:16.36742},
+          {name:'Rathausplatz Wiener Christkindlmarkt 夜市',time:'16:30–20:00',lat:48.21042,lng:16.35965}
+        ]},
+        day3:{label:'Day 3',date:'11 月 15 日 · 星期日',color:'#244b3d',stops:[
+          {name:'百水公寓 Hundertwasserhaus（外觀）',time:'09:30–10:00',lat:48.20727,lng:16.39430},
+          {name:'Hundertwasser Village',time:'10:00–10:30',lat:48.20702,lng:16.39466},
+          {name:'KunstHausWien · Museum Hundertwasser',time:'10:35–11:45',lat:48.21079,lng:16.39328},
+          {name:'Prater：Riesenrad＋Wintermarkt',time:'12:00–13:00',lat:48.21665,lng:16.39539},
+          {name:'Otto Wagner 亭（外觀影相）',time:'15:00–15:15',lat:48.20045,lng:16.36990},
+          {name:'Wien Museum 主館',time:'15:15–16:00',lat:48.19935,lng:16.37297},
+          {name:'維也納分離派展覽館 Secession（外觀影相）',time:'16:00–16:20',lat:48.20036,lng:16.36568},
+          {name:'聖查爾斯教堂 Karlskirche（入內參觀）',time:'16:20–17:05',lat:48.19827,lng:16.37125},
+          {name:'Art Advent 聖誕市集 · Karlsplatz',time:'17:00–19:30',lat:48.19880,lng:16.37050}
+        ]},
+        day4:{label:'Day 4',date:'11 月 16 日 · 星期一',color:'#a86e1d',stops:[
+          {name:'Majolikahaus（U4 順路影相）',time:'08:45–09:15',lat:48.19754,lng:16.35871},
+          {name:'美泉宮 Grand Tour · Schönbrunn Palace',time:'09:45–12:00',lat:48.18479,lng:16.31227},
+          {name:'皇宮花園＋Gloriette',time:'13:45–15:30',lat:48.17816,lng:16.30861},
+          {name:'美泉宮聖誕市集（Ehrenhof 宮前廣場）',time:'15:30–18:30',lat:48.18545,lng:16.31185}
+        ]},
+        day5:{label:'Day 5',date:'11 月 17 日 · 星期二',color:'#31517d',stops:[
+          {name:'司法宮 Justizpalast',time:'09:30–10:30',lat:48.20652,lng:16.35755},
+          {name:'Palais Daun-Kinsky',time:'10:45–11:30',lat:48.21185,lng:16.36551},
+          {name:'Freyung 聖誕市集 Altwiener Christkindlmarkt',time:'11:30–12:00',lat:48.21149,lng:16.36595},
+          {name:'小兄弟教堂 Minoritenkirche（Optional）',time:'13:30–14:00',lat:48.20972,lng:16.36435},
+          {name:'奧地利郵政儲蓄銀行 Postsparkasse（Optional）',time:'14:00–14:30',lat:48.21003,lng:16.38073},
+          {name:'耶穌會教堂 Jesuitenkirche（Optional）',time:'14:30–15:00',lat:48.20906,lng:16.37756}
+        ]}
+      };
+      function pinIcon(color,num,spider){
+        var ring=spider?'<circle cx="12" cy="12" r="11" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="2.5"/>':'';
+        var svg='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'+ring+'<circle cx="12" cy="12" r="'+(spider?9.5:10)+'" fill="'+color+'" stroke="#ffffff" stroke-width="2"/><text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans HK, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff">'+num+'</text></svg>';
+        return {url:'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),scaledSize:new google.maps.Size(24,24),anchor:new google.maps.Point(12,12)};
+      }
+      window.initViennaMap=function(){
+        clearTimeout(loadTimer);
+        if(!(window.google&&google.maps&&google.maps.Map)){showFallback();return;}
+        var map=new google.maps.Map(box,{
+          center:{lat:48.2055,lng:16.3725},
+          zoom:13,
+          scrollwheel:false,
+          streetViewControl:false,
+          mapTypeControl:false,
+          fullscreenControl:false
+        });
+        var infoWindow=new google.maps.InfoWindow({maxWidth:280});
+        var overlay=new google.maps.OverlayView();
+        overlay.draw=function(){};
+        overlay.setMap(map);
+        function toPx(ll){
+          var proj=overlay.getProjection();
+          return proj?proj.fromLatLngToDivPixel(ll):null;
+        }
+        function fromPx(pt){
+          return overlay.getProjection().fromDivPixelToLatLng(pt);
+        }
+        var groups={};
+        var dayMarkers={};
+        /* 日子開關嘅唯一狀態來源：掣嘅 aria-pressed 同地圖圖層一律由 renderDays() 依呢度同步，唔會再唔一致 */
+        var visible={day1:false,day2:true,day3:false,day4:false,day5:false};
+        Object.keys(DAYS).forEach(function(key){
+          var day=DAYS[key];
+          var points=[];
+          var list=[];
+          day.stops.forEach(function(stop,index){
+            var pos={lat:stop.lat,lng:stop.lng};
+            var marker=new google.maps.Marker({position:pos,title:stop.name,icon:pinIcon(day.color,index+1,false)});
+            marker._pinData={dayKey:key,num:index+1,html:'<div class="map-pop"><strong>'+stop.name+'</strong><br><span class="pop-day" style="color:'+day.color+'">'+day.label+' · '+day.date+'</span><br>'+stop.time+'</div>'};
+            marker.addListener('click',function(){onPinClick(marker);});
+            list.push(marker);
+            points.push(pos);
+          });
+          var line=null;
+          if(points.length>1) line=new google.maps.Polyline({path:points,strokeColor:day.color,strokeWeight:2,strokeOpacity:.5,clickable:false});
+          groups[key]={markers:list,line:line,points:points};
+          dayMarkers[key]=list;
+        });
+        function openPinPopup(marker){
+          infoWindow.setContent(marker._pinData.html);
+          infoWindow.open(map,marker);
+        }
+        /* 疊住嘅 pin：㩒落去自動散開 (spiderfy)，散開後逐個㩒嚟睇 */
+        var spiderClones=[];
+        var spiderLines=[];
+        var spiderHidden=[];
+        function unspiderfy(){
+          spiderClones.forEach(function(c){c.setMap(null);});
+          spiderClones=[];
+          spiderLines.forEach(function(l){l.setMap(null);});
+          spiderLines=[];
+          spiderHidden.forEach(function(m){
+            if(visible[m._pinData.dayKey]) m.setMap(map);
+          });
+          spiderHidden=[];
+        }
+        function onPinClick(marker){
+          unspiderfy();
+          var p0=toPx(marker.getPosition());
+          if(!p0){openPinPopup(marker);return;}
+          var cluster=[marker];
+          var changed=true;
+          while(changed){
+            changed=false;
+            Object.keys(dayMarkers).forEach(function(k){
+              if(!visible[k]) return;
+              dayMarkers[k].forEach(function(m){
+                if(cluster.indexOf(m)!==-1) return;
+                var mp=toPx(m.getPosition());
+                if(!mp) return;
+                var near=cluster.some(function(c){
+                  var cp=toPx(c.getPosition());
+                  if(!cp) return false;
+                  var dx=mp.x-cp.x,dy=mp.y-cp.y;
+                  return Math.sqrt(dx*dx+dy*dy)<36;
+                });
+                if(near){cluster.push(m);changed=true;}
+              });
+            });
+          }
+          if(cluster.length<2){openPinPopup(marker);return;}
+          spiderfy(cluster,marker);
+        }
+        function spiderfy(cluster,focus){
+          var cx=0,cy=0,ok=true;
+          cluster.forEach(function(m){
+            var p=toPx(m.getPosition());
+            if(!p){ok=false;return;}
+            cx+=p.x;cy+=p.y;
+          });
+          if(!ok){openPinPopup(focus);return;}
+          var centroid=new google.maps.Point(cx/cluster.length,cy/cluster.length);
+          var radius=Math.max(42,cluster.length*14);
+          var focusClone=null;
+          cluster.forEach(function(m,i){
+            m.setMap(null);
+            spiderHidden.push(m);
+            var ang=-Math.PI/2+(i/cluster.length)*Math.PI*2;
+            var ll=fromPx(new google.maps.Point(centroid.x+Math.cos(ang)*radius,centroid.y+Math.sin(ang)*radius));
+            var day=DAYS[m._pinData.dayKey];
+            var clone=new google.maps.Marker({position:ll,icon:pinIcon(day.color,m._pinData.num,true)});
+            clone._pinData=m._pinData;
+            clone.addListener('click',function(){openPinPopup(clone);});
+            clone.setMap(map);
+            spiderClones.push(clone);
+            spiderLines.push(new google.maps.Polyline({path:[m.getPosition(),ll],strokeColor:'#8a7a68',strokeWeight:1,strokeOpacity:.6,clickable:false,map:map}));
+            if(m===focus) focusClone=clone;
+          });
+          if(focusClone) openPinPopup(focusClone);
+        }
+        map.addListener('click',function(){
+          map.setOptions({scrollwheel:true});
+          unspiderfy();
+          infoWindow.close();
+        });
+        map.addListener('zoom_changed',function(){unspiderfy();});
+        function fitVisible(){
+          var bounds=new google.maps.LatLngBounds();
+          var any=false;
+          Object.keys(groups).forEach(function(key){
+            if(!visible[key]) return;
+            groups[key].points.forEach(function(p){bounds.extend(p);any=true;});
+          });
+          if(any) map.fitBounds(bounds,36);
+          else { map.setCenter({lat:48.2055,lng:16.3725}); map.setZoom(13); }
+        }
+        function renderDays(){
+          Object.keys(groups).forEach(function(key){
+            var on=!!visible[key];
+            groups[key].markers.forEach(function(m){m.setMap(on?map:null);});
+            if(groups[key].line) groups[key].line.setMap(on?map:null);
+          });
+          toggles.forEach(function(b){
+            b.setAttribute('aria-pressed',visible[b.getAttribute('data-day')]?'true':'false');
+          });
+        }
+        toggles.forEach(function(button){
+          button.addEventListener('click',function(){
+            var key=button.getAttribute('data-day');
+            unspiderfy();
+            infoWindow.close();
+            visible[key]=!visible[key];
+            renderDays();
+            fitVisible();
+          });
+        });
+        renderDays();
+        fitVisible();
+      };
+    })();
+  </script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD0SsIwPA6hdtAXPx2q407Sn33g1NlL_4A&callback=initViennaMap&loading=async" onerror="viennaMapFailed()"></script>
+
 </body>
 </html>
