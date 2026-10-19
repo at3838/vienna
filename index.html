@@ -304,6 +304,20 @@
     #vienna-map{position:relative;z-index:0;height:520px;border-radius:var(--radius-md);border:1px solid var(--line);overflow:hidden;background:var(--soft)}
     .map-fallback{display:grid;place-items:center;height:100%;padding:24px;text-align:center;color:var(--muted);font-size:.95rem}
     .map-hint{margin:12px 0 0;color:var(--muted);font-size:.9rem}
+    .map-shell{position:relative}
+    .map-box{position:relative}
+    .map-fs-btn{position:absolute;top:10px;right:10px;z-index:5;display:inline-flex;align-items:center;gap:7px;background:#fff;color:#241b16;border:0;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.3);padding:10px 13px;font:700 .85rem "Noto Sans HK",sans-serif;cursor:pointer}
+    .map-fs-btn svg{width:16px;height:16px;flex:0 0 auto}
+    .map-fs-btn .ic-close{display:none}
+    .map-shell.map-fs .map-fs-btn .ic-close{display:block}
+    .map-shell.map-fs .map-fs-btn .ic-expand{display:none}
+    .map-fs-btn:hover{background:#f4efe6}
+    .map-fs-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    .map-shell.map-fs{position:fixed;inset:0;z-index:200;background:var(--paper);padding:12px 14px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+    .map-shell.map-fs .map-toggles{flex:0 0 auto;margin-bottom:10px}
+    .map-shell.map-fs .map-box{flex:1 1 auto;min-height:0}
+    .map-shell.map-fs #vienna-map{height:100%}
+    body.map-fs-lock{overflow:hidden}
     .map-pop{font-family:"Noto Sans HK",sans-serif;font-size:.92rem;line-height:1.55;color:#241b16;max-width:250px}
     .map-pop .pop-day{font-size:.8rem;font-weight:700}
     @media(max-width:520px){.map-section{padding:22px 16px;margin-bottom:54px}#vienna-map{height:430px}}
@@ -402,6 +416,7 @@
 <div class="jump-actions"><a class="jump-button restaurant-jump" href="#restaurants">餐廳推薦 <span>正餐、傳統維也納菜</span></a><a class="jump-button cafe-jump" href="#cafes">咖啡館推薦 <span>早餐、蛋糕、咖啡</span></a></div>
 </section><section aria-labelledby="route-map-title" class="map-section" id="route-map">
 <div class="section-head"><div><p class="kicker">互動路線圖</p><h2 id="route-map-title">五日景點，一張圖睇晒點行</h2></div><p>每個景點一個編號 marker，顏色跟日子分，同日景點按次序用線連起。預設只開 Day 2，㩒上面嘅日子掣逐日顯示或收起，畫面唔會一次過塞爆。</p></div>
+<div class="map-shell" id="map-shell">
 <div aria-label="逐日顯示或收起景點" class="map-toggles" role="group">
 <button aria-pressed="false" class="map-toggle" data-day="day1" type="button"><span class="dot" style="background:#7a5c2e"></span>Day 1 · 到埗夜</button>
 <button aria-pressed="true" class="map-toggle" data-day="day2" type="button"><span class="dot" style="background:#a52e28"></span>Day 2 · 內城皇宮線</button>
@@ -409,7 +424,11 @@
 <button aria-pressed="false" class="map-toggle" data-day="day4" type="button"><span class="dot" style="background:#a86e1d"></span>Day 4 · 美泉宮</button>
 <button aria-pressed="false" class="map-toggle" data-day="day5" type="button"><span class="dot" style="background:#31517d"></span>Day 5 · 司法宮＋Freyung</button>
 </div>
+<div class="map-box">
 <div aria-label="維也納五日行程互動地圖" id="vienna-map" role="application"></div>
+<button aria-pressed="false" class="map-fs-btn" id="map-fs-btn" type="button"><svg aria-hidden="true" class="ic-expand" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><svg aria-hidden="true" class="ic-close" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-label">全螢幕</span></button>
+</div>
+</div>
 <p class="map-hint">㩒地圖上嘅編號圓點，會彈出景點名、屬於邊一日同時間表時間；編號即係當日嘅參觀次序，路線線跟住編號行。如果幾個圓點疊埋一齊，㩒落去佢哋會自動散開，逐個㩒嚟睇就得。可以拖動同放大地圖慢慢睇。</p>
 </section><section aria-labelledby="plan-title">
 <div class="section-head">
@@ -1142,6 +1161,12 @@
           mapTypeControl:false,
           fullscreenControl:false
         });
+        window.viennaMapResize=function(){
+          var c=map.getCenter(),z=map.getZoom();
+          google.maps.event.trigger(map,'resize');
+          if(c) map.setCenter(c);
+          if(z!=null) map.setZoom(z);
+        };
         var infoWindow=new google.maps.InfoWindow({maxWidth:280});
         var overlay=new google.maps.OverlayView();
         overlay.draw=function(){};
@@ -1285,6 +1310,50 @@
         renderDays();
         fitVisible();
       };
+    })();
+  </script>
+<script>
+    (function(){
+      var shell=document.getElementById('map-shell');
+      var btn=document.getElementById('map-fs-btn');
+      if(!shell||!btn) return;
+      var label=btn.querySelector('.fs-label');
+      var nativeFs=false;
+      function refreshMap(){
+        setTimeout(function(){ if(window.viennaMapResize) window.viennaMapResize(); },80);
+      }
+      function isOn(){ return shell.classList.contains('map-fs'); }
+      function setState(on){
+        shell.classList.toggle('map-fs',on);
+        document.body.classList.toggle('map-fs-lock',on);
+        btn.setAttribute('aria-pressed',on?'true':'false');
+        if(label) label.textContent=on?'退出全螢幕':'全螢幕';
+        refreshMap();
+      }
+      btn.addEventListener('click',function(){
+        if(isOn()){
+          setState(false);
+          if(document.fullscreenElement&&document.exitFullscreen){
+            var p=document.exitFullscreen();
+            if(p&&p.catch) p.catch(function(){});
+          }
+        }else{
+          setState(true);
+          if(shell.requestFullscreen){
+            var rp=shell.requestFullscreen();
+            if(rp&&rp.then) rp.then(function(){ nativeFs=true; refreshMap(); }).catch(function(){ nativeFs=false; });
+          }
+        }
+      });
+      document.addEventListener('fullscreenchange',function(){
+        if(!document.fullscreenElement&&nativeFs){
+          nativeFs=false;
+          if(isOn()) setState(false);
+        }
+      });
+      document.addEventListener('keydown',function(e){
+        if((e.key==='Escape'||e.key==='Esc')&&isOn()&&!document.fullscreenElement) setState(false);
+      });
     })();
   </script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD0SsIwPA6hdtAXPx2q407Sn33g1NlL_4A&callback=initViennaMap&loading=async" onerror="viennaMapFailed()"></script>
